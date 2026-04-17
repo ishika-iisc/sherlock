@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+*.sqlite
+*.db
+uploads/
+
+# Large files / models
+*.gguf
+*.bin
+
+# Uploaded docs & storage
+backend/app/storage/
+backend/storage/
+
+# Logs
+*.log
+
+# Archives
+*.zip
+
+# Sample PDFs
+DoctoPDF/
+
+# Non-essential
+sherlock/
+docs/
+tools/
+*.pptx
+package-lock.json
+*.safetensors
+evaluation/
+data/
