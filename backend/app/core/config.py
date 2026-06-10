@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     STORAGE_DIR: Path = Path(__file__).parent.parent / "storage"
     DOCUMENTS_DIR: Path = STORAGE_DIR / "documents"
     PROCESSED_DIR: Path = STORAGE_DIR / "processed"
+    EVALUATION_DIR: Path = STORAGE_DIR / "evaluation"
+    EVALUATION_BENCHMARK_FILE: Path = EVALUATION_DIR / "benchmark.json"
+    SAMPLE_CONTRACTS_DIR: Path = Path("sample_contracts")
 
     # Database
     DATABASE_URL: str = "sqlite:///./doc_intelligence.db"
@@ -28,11 +31,19 @@ class Settings(BaseSettings):
     # Model
     VLM_MODEL: str = "microsoft/layoutlmv3-base"
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+    LLM_BACKEND: str = "llama_cpp"
+    VLLM_BASE_URL: str = "http://localhost:8001/v1"
+    VLLM_MODEL: str = "Qwen/Qwen3-0.6B"
+    VLLM_API_KEY: str = "EMPTY"
+    VLLM_TIMEOUT_SECONDS: int = 120
+    PREWARM_LLM: bool = False
 
     # Processing
     MAX_FILE_SIZE_MB: int = 50
     SUPPORTED_FORMATS: list[str] = [".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".docx"]
     CONFIDENCE_THRESHOLD: float = 0.7
+    ENABLE_LLM_ENTITY_EXTRACTION: bool = False
+    LLM_ENTITY_MAX_DOC_CHARS: int = 30000
 
     class Config:
         env_file = ".env"

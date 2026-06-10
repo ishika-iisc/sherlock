@@ -3,6 +3,7 @@ import re
 import json
 import logging
 import numpy as np
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -12,7 +13,7 @@ _faiss_index = None
 _chunk_store: list[dict] = []
 EMBEDDING_DIM = 384
 
-STORAGE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "storage")
+STORAGE_DIR = str(settings.STORAGE_DIR)
 FAISS_INDEX_PATH = os.path.join(STORAGE_DIR, "faiss_index.bin")
 CHUNK_STORE_PATH = os.path.join(STORAGE_DIR, "chunk_store.json")
 
@@ -54,6 +55,20 @@ def _save_index():
         logger.info(f"FAISS index saved: {_faiss_index.ntotal} vectors")
     except Exception as e:
         logger.error(f"Failed to save FAISS index: {e}")
+
+
+def reset_index():
+    """Clear the semantic index before a full corpus rebuild."""
+    global _faiss_index, _chunk_store
+    import faiss
+
+    os.makedirs(STORAGE_DIR, exist_ok=True)
+    _faiss_index = faiss.IndexFlatIP(EMBEDDING_DIM)
+    _chunk_store = []
+    for path in (FAISS_INDEX_PATH, CHUNK_STORE_PATH):
+        if os.path.exists(path):
+            os.remove(path)
+    _save_index()
 
 
 def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[str]:

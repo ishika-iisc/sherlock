@@ -7,6 +7,20 @@ logger = logging.getLogger(__name__)
 # Mock reference data (simulates ERP/CRM lookup)
 MOCK_VENDORS = {"acme corp", "globex inc", "initech", "umbrella corp", "wayne enterprises"}
 MOCK_PO_NUMBERS = {"PO-2024-001", "PO-2024-002", "PO-2024-100", "PO-2025-001"}
+BAD_ENTITY_VALUES = {
+    "provided",
+    "the",
+    "and",
+    "shall",
+    "agreement",
+    "services",
+    "service",
+    "supplier",
+    "buyer",
+    "customer",
+    "client",
+}
+COMPANY_SUFFIXES = ("ltd", "limited", "llc", "inc", "corp", "corporation", "plc", "gmbh", "company", "co.")
 
 
 def validate_extractions(entities: list[dict]) -> list[dict]:
@@ -24,6 +38,10 @@ def validate_extractions(entities: list[dict]) -> list[dict]:
             results.append(_validate_email(value))
         elif name == "vendor_name":
             results.append(_validate_vendor(value))
+        elif name == "buyer_name":
+            results.append(_validate_company_like_field("buyer_name", value))
+        elif name == "parties":
+            results.append(_validate_parties(value))
         elif name == "po_number":
             results.append(_validate_po(value))
         elif name == "invoice_number":
@@ -70,9 +88,62 @@ def _validate_email(value: str) -> dict:
 
 
 def _validate_vendor(value: str) -> dict:
+    if _is_bad_entity_value(value):
+        return {
+            "field_name": "vendor_name",
+            "extracted_value": value,
+            "is_valid": False,
+            "message": "Vendor extraction looks like a generic word, not an organization",
+        }
+
     found = value.strip().lower() in MOCK_VENDORS
+    if not found and not _looks_like_company_name(value):
+        return {
+            "field_name": "vendor_name",
+            "extracted_value": value,
+            "is_valid": False,
+            "message": "Vendor extraction is not shaped like a company name",
+        }
+
     return {"field_name": "vendor_name", "extracted_value": value,
             "is_valid": found, "message": "Vendor found in system" if found else "Vendor not found — verify manually"}
+
+
+def _validate_company_like_field(field_name: str, value: str) -> dict:
+    valid = not _is_bad_entity_value(value) and _looks_like_company_name(value)
+    return {
+        "field_name": field_name,
+        "extracted_value": value,
+        "is_valid": valid,
+        "message": "Looks like an organization name" if valid else "Value does not look like an organization name",
+    }
+
+
+def _validate_parties(value: str) -> dict:
+    if _is_bad_entity_value(value):
+        return {
+            "field_name": "parties",
+            "extracted_value": value,
+            "is_valid": False,
+            "message": "Parties extraction is too generic",
+        }
+
+    if " and " not in value.lower():
+        return {
+            "field_name": "parties",
+            "extracted_value": value,
+            "is_valid": False,
+            "message": "Parties extraction should include two named parties",
+        }
+
+    left, right = [part.strip() for part in re.split(r"(?i)\sand\s", value, maxsplit=1)]
+    valid = _looks_like_company_name(left) and _looks_like_company_name(right)
+    return {
+        "field_name": "parties",
+        "extracted_value": value,
+        "is_valid": valid,
+        "message": "Detected two plausible parties" if valid else "One or more parties look incomplete",
+    }
 
 
 def _validate_po(value: str) -> dict:
@@ -85,3 +156,22 @@ def _validate_invoice_number(value: str) -> dict:
     valid = bool(re.match(r"^[A-Z0-9\-]{3,20}$", value))
     return {"field_name": "invoice_number", "extracted_value": value,
             "is_valid": valid, "message": "Valid format" if valid else "Unusual invoice number format"}
+
+
+def _is_bad_entity_value(value: str) -> bool:
+    lowered = value.strip().lower()
+    if lowered in BAD_ENTITY_VALUES:
+        return True
+    if len(lowered.split()) == 1 and lowered.isalpha() and len(lowered) < 10:
+        return True
+    return False
+
+
+def _looks_like_company_name(value: str) -> bool:
+    lowered = value.strip().lower()
+    if any(token in lowered for token in COMPANY_SUFFIXES):
+        return True
+
+    words = [word for word in re.split(r"\s+", value.strip()) if word]
+    capitalized_words = sum(1 for word in words if word[:1].isupper())
+    return len(words) >= 2 and capitalized_words >= 2

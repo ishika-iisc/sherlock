@@ -20,10 +20,12 @@ uploads/
 # Large files / models
 *.gguf
 *.bin
+backend/models/
 
 # Uploaded docs & storage
 backend/app/storage/
 backend/storage/
+backend/doc_intelligence.db*
 
 # Logs
 *.log
@@ -39,7 +41,7 @@ sherlock/
 docs/
 tools/
 *.pptx
-package-lock.json
 *.safetensors
 evaluation/
 data/
+sample_contracts/

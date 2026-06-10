@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getDocument, validateDocument, reprocessDocument, askQuestion } from '../services/api';
 
+function makeValidationKey(fieldName, fieldValue) {
+  return `${fieldName}::${fieldValue || ''}`;
+}
+
 export default function DocumentDetail() {
   const { id } = useParams();
   const [data, setData] = useState(null);
@@ -12,8 +16,44 @@ export default function DocumentDetail() {
   const [asking, setAsking] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    getDocument(id).then(r => setData(r.data)).catch(() => {}).finally(() => setLoading(false));
+    let active = true;
+    let intervalId = null;
+
+    const load = async (showSpinner = false) => {
+      if (showSpinner) setLoading(true);
+      try {
+        const res = await getDocument(id);
+        if (!active) return;
+        setData(res.data);
+
+        const status = res.data?.document?.status;
+        if ((status === 'completed' || status === 'review_needed') && !validations) {
+          try {
+            const validationRes = await validateDocument(id);
+            if (active) setValidations(validationRes.data);
+          } catch (_) {
+          }
+        }
+        const shouldPoll = status === 'uploaded' || status === 'processing';
+        if (shouldPoll && !intervalId) {
+          intervalId = window.setInterval(() => load(false), 3000);
+        }
+        if (!shouldPoll && intervalId) {
+          window.clearInterval(intervalId);
+          intervalId = null;
+        }
+      } catch (_) {
+      } finally {
+        if (showSpinner && active) setLoading(false);
+      }
+    };
+
+    load(true);
+
+    return () => {
+      active = false;
+      if (intervalId) window.clearInterval(intervalId);
+    };
   }, [id]);
 
   const handleValidate = async () => {
@@ -56,7 +96,10 @@ export default function DocumentDetail() {
   if (loading) return <div className="loading">Loading...</div>;
   if (!data) return <div className="error">Document not found</div>;
 
-  const { document: doc, extractions } = data;
+  const { document: doc, extractions, processing_logs: processingLogs = [] } = data;
+  const validationMap = new Map(
+    (validations || []).map((v) => [makeValidationKey(v.field_name, v.extracted_value), v])
+  );
 
   return (
     <div>
@@ -142,19 +185,72 @@ export default function DocumentDetail() {
           <p style={{ color: '#666' }}>No extractions yet. Document may still be processing.</p>
         ) : (
           <div className="extraction-grid">
-            {extractions.map(ext => (
+            {extractions.map(ext => {
+              const validation = validationMap.get(makeValidationKey(ext.field_name, ext.field_value));
+              const reviewMessage = ext.needs_review
+                ? (validation?.message || 'This field was flagged for manual review.')
+                : null;
+
+              return (
               <div key={ext.id} className="extraction-item" style={{ borderColor: ext.needs_review ? '#ffc107' : '#eee' }}>
                 <div className="field-name">
                   {ext.field_name}
                   {ext.needs_review ? ' ⚠️' : ''}
                 </div>
                 <div className="field-value">{ext.field_value || '—'}</div>
+                {reviewMessage && (
+                  <div style={{
+                    marginTop: 8,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    background: '#fff8e1',
+                    color: '#8a6d1d',
+                    fontSize: 12,
+                    lineHeight: 1.4,
+                  }}>
+                    {reviewMessage}
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 12, color: '#666' }}>
                   <span>Source: {ext.source}</span>
                   <span>
                     <ConfidenceBar value={ext.confidence} /> {(ext.confidence * 100).toFixed(0)}%
                   </span>
                 </div>
+              </div>
+            )})}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Processing Logs</h2>
+        {processingLogs.length === 0 ? (
+          <p style={{ color: '#666' }}>No processing logs yet.</p>
+        ) : (
+          <div style={{
+            maxHeight: 360,
+            overflowY: 'auto',
+            background: '#111827',
+            borderRadius: 12,
+            padding: 12,
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+            fontSize: 12,
+            color: '#e5e7eb',
+          }}>
+            {processingLogs.map((log) => (
+              <div key={log.id} style={{
+                display: 'grid',
+                gridTemplateColumns: '120px 110px 1fr',
+                gap: 12,
+                padding: '6px 0',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+              }}>
+                <span style={{ color: '#93c5fd' }}>{new Date(log.created_at).toLocaleTimeString()}</span>
+                <span style={{ color: log.level === 'error' ? '#fca5a5' : log.level === 'warning' ? '#fde68a' : '#86efac' }}>
+                  [{log.step}]
+                </span>
+                <span>{log.message}</span>
               </div>
             ))}
           </div>

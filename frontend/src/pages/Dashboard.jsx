@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { getStats, getDocuments } from '../services/api';
+import { getStats, getDocuments, getEvaluationMetrics } from '../services/api';
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
+  const [evaluationMetrics, setEvaluationMetrics] = useState([]);
+  const [benchmarkAvailable, setBenchmarkAvailable] = useState(false);
 
   useEffect(() => {
     getStats().then(r => setStats(r.data)).catch(() => {});
     getDocuments({ limit: 5 }).then(r => setRecent(r.data)).catch(() => {});
+    getEvaluationMetrics().then(r => {
+      setEvaluationMetrics(r.data.metrics || []);
+      setBenchmarkAvailable(Boolean(r.data.benchmark_available));
+    }).catch(() => {});
   }, []);
+
+  const implementedMetrics = evaluationMetrics.filter((metric) => metric.category !== 'planned');
+  const plannedMetrics = evaluationMetrics.filter((metric) => metric.category === 'planned');
 
   return (
     <div>
@@ -19,6 +28,37 @@ export default function Dashboard() {
         <StatCard label="Needs Review" value={stats?.review_needed ?? '—'} />
         <StatCard label="Avg Processing Time" value={stats?.avg_processing_time_ms ? `${stats.avg_processing_time_ms}ms` : '—'} />
       </div>
+
+      <div className="card">
+        <div className="section-heading">
+          <div>
+            <h2>Evaluation Metrics</h2>
+            <p className="section-subtitle">
+              Research metrics for benchmarking extraction accuracy, retrieval quality, question-answering performance, and system efficiency.
+            </p>
+          </div>
+          <span className="badge badge-gray">{benchmarkAvailable ? 'Benchmark Dataset Loaded' : 'Benchmark Dataset Missing'}</span>
+        </div>
+        <div style={{ marginBottom: 18 }}>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: 16 }}>Currently Available in App</h3>
+          <div className="evaluation-grid">
+            {implementedMetrics.map((metric) => (
+              <MetricCard key={metric.key} metric={metric} />
+            ))}
+          </div>
+        </div>
+        {plannedMetrics.length > 0 && (
+          <div>
+            <h3 style={{ margin: '0 0 10px 0', fontSize: 16 }}>Planned Next</h3>
+            <div className="evaluation-grid">
+              {plannedMetrics.map((metric) => (
+                <MetricCard key={metric.key} metric={metric} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="card">
         <h2>Recent Documents</h2>
         {recent.length === 0 ? (
@@ -39,6 +79,17 @@ export default function Dashboard() {
           </table>
         )}
       </div>
+    </div>
+  );
+}
+
+function MetricCard({ metric }) {
+  return (
+    <div className="evaluation-card">
+      <div className="evaluation-label">{metric.label}</div>
+      <div className="evaluation-value">{metric.display_value}</div>
+      <div className={`evaluation-status status-${metric.status}`}>{metric.status}</div>
+      <p className="evaluation-detail">{metric.description}</p>
     </div>
   );
 }

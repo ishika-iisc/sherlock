@@ -5,12 +5,14 @@ import Upload from './pages/Upload';
 import Documents from './pages/Documents';
 import DocumentDetail from './pages/DocumentDetail';
 import Search from './pages/Search';
+import AgenticRAG from './pages/AgenticRAG';
 
 const navItems = [
   { path: '/', label: '📊 Dashboard' },
   { path: '/upload', label: '📤 Upload' },
   { path: '/documents', label: '📄 Documents' },
   { path: '/search', label: '🔍 Search' },
+  { path: '/agentic-rag', label: 'Agentic RAG' },
 ];
 
 export default function App() {
@@ -32,6 +34,7 @@ export default function App() {
             <Route path="/documents" element={<Documents />} />
             <Route path="/documents/:id" element={<DocumentDetail />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/agentic-rag" element={<AgenticRAG />} />
           </Routes>
         </main>
       </div>

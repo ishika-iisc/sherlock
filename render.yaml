@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: sherlock-document-intelligence
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: standard
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: DATABASE_URL
+        value: sqlite:////data/doc_intelligence.db
+      - key: STORAGE_DIR
+        value: /data
+      - key: DOCUMENTS_DIR
+        value: /data/documents
+      - key: PROCESSED_DIR
+        value: /data/processed
+      - key: EVALUATION_DIR
+        value: /data/evaluation
+      - key: TOKENIZERS_PARALLELISM
+        value: "false"
+      - key: FRONTEND_DIST_DIR
+        value: /app/frontend/dist
+    disk:
+      name: sherlock-data
+      mountPath: /data
+      sizeGB: 10

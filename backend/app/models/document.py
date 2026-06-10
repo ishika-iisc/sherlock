@@ -40,6 +40,7 @@ class Document(Base):
     full_text = Column(Text, nullable=True)
 
     extractions = relationship("Extraction", back_populates="document", cascade="all, delete-orphan")
+    processing_logs = relationship("ProcessingLog", back_populates="document", cascade="all, delete-orphan")
 
 
 class ChatHistory(Base):
@@ -69,3 +70,16 @@ class Extraction(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     document = relationship("Document", back_populates="extractions")
+
+
+class ProcessingLog(Base):
+    __tablename__ = "processing_logs"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    document_id = Column(String, ForeignKey("documents.id"), nullable=False)
+    step = Column(String, nullable=False)
+    level = Column(String, default="info")
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    document = relationship("Document", back_populates="processing_logs")

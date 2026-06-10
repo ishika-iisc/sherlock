@@ -25,12 +25,22 @@ M.Tech. Project — Ishika Saxena
 
 ## Quick Start
 
+### Local model
+The Phi-3 GGUF file is not committed because it is about 2.2 GB. Download it before using LLM-backed Q&A:
+
+```bash
+mkdir -p backend/models
+curl -L -o backend/models/Phi-3-mini-4k-instruct-q4.gguf \
+  https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf
+```
+
 ### Backend
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
 uvicorn main:app --reload --port 8000
 ```
 
@@ -41,7 +51,21 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000
+Open http://localhost:5173
+
+### Single-service run
+FastAPI can also serve the production React build:
+
+```bash
+cd frontend
+npm install
+npm run build
+cd ../backend
+source venv/bin/activate
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Open http://localhost:8000
 
 ## API Endpoints
 
@@ -53,8 +77,12 @@ Open http://localhost:3000
 | DELETE | /api/v1/documents/{id} | Delete a document |
 | POST | /api/v1/documents/{id}/reprocess | Re-run extraction |
 | GET | /api/v1/documents/{id}/validate | Validate extracted data |
+| POST | /api/v1/ask | Ask across indexed documents |
+| POST | /api/v1/agent/ask | Route a question to search/single/multi/global QA |
+| POST | /api/v1/agentic-rag/ask | Agentic RAG with evidence grading |
 | POST | /api/v1/search | Search documents |
 | GET | /api/v1/stats | Processing statistics |
+| GET | /api/v1/evaluation/metrics | Evaluation metrics |
 | GET | /health | Health check |
 
 ## Tech Stack
@@ -62,6 +90,7 @@ Open http://localhost:3000
 - **Frontend**: React, Vite, Axios
 - **AI/ML**: Tesseract OCR, EasyOCR, LayoutLMv3 (HuggingFace Transformers), PyTorch
 - **Search**: In-memory keyword search (upgradeable to Elasticsearch)
+- **RAG**: Sentence Transformers + FAISS + local llama-cpp Phi-3 GGUF model
 
 ## Project Structure
 ```

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 
@@ -31,9 +31,21 @@ class ExtractionResponse(BaseModel):
         from_attributes = True
 
 
+class ProcessingLogResponse(BaseModel):
+    id: str
+    step: str
+    level: str
+    message: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class DocumentDetailResponse(BaseModel):
     document: DocumentResponse
     extractions: list[ExtractionResponse]
+    processing_logs: list[ProcessingLogResponse]
 
 
 class SearchRequest(BaseModel):
@@ -71,9 +83,86 @@ class QAResponse(BaseModel):
     error: str | None = None
 
 
+class AgentRequest(BaseModel):
+    question: str
+    document_id: str | None = None
+    document_ids: list[str] = Field(default_factory=list)
+    mode: str = "auto"
+    limit: int = 5
+
+
+class AgentCitation(BaseModel):
+    document_id: str | None = None
+    document_name: str | None = None
+    snippet: str | None = None
+    confidence: float | None = None
+
+
+class AgentResponse(BaseModel):
+    answer: str
+    route: str
+    confidence: float | None = None
+    citations: list[AgentCitation]
+    latency_ms: int
+    reasoning: str
+    error: str | None = None
+
+
+class AgenticRAGRequest(BaseModel):
+    question: str
+    document_id: str | None = None
+    document_ids: list[str] = Field(default_factory=list)
+    max_evidence: int = 6
+
+
+class AgenticRAGEvidence(BaseModel):
+    document_id: str | None = None
+    document_name: str | None = None
+    snippet: str
+    score: float
+    source: str
+    matched_query: str | None = None
+    matched_terms: list[str] = Field(default_factory=list)
+    clause_type: str | None = None
+    evidence_reason: str | None = None
+    rank: int
+
+
+class AgenticRAGStep(BaseModel):
+    name: str
+    status: str
+    detail: str
+
+
+class AgenticRAGResponse(BaseModel):
+    answer: str
+    intent: str
+    confidence: float
+    evidence: list[AgenticRAGEvidence]
+    steps: list[AgenticRAGStep]
+    latency_ms: int
+    error: str | None = None
+
+
 class ProcessingStats(BaseModel):
     total_documents: int
     completed: int
     failed: int
     review_needed: int
     avg_processing_time_ms: float | None
+
+
+class EvaluationMetricResponse(BaseModel):
+    key: str
+    label: str
+    value: float | str | None
+    display_value: str
+    description: str
+    unit: str | None = None
+    status: str
+    category: str
+
+
+class EvaluationMetricsResponse(BaseModel):
+    benchmark_available: bool
+    metrics: list[EvaluationMetricResponse]

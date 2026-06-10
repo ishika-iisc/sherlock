@@ -1,6 +1,7 @@
 import shutil
 import uuid
 import logging
+import mimetypes
 from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -8,17 +9,39 @@ from sqlalchemy import func
 
 from app.core.database import get_db
 from app.core.config import settings
-from app.models.document import Document, Extraction, DocumentStatus
+from app.models.document import Document, Extraction, DocumentStatus, DocumentType, ProcessingLog
 from app.models.schemas import (
     DocumentResponse, DocumentDetailResponse, ExtractionResponse,
     SearchRequest, SearchResult, ValidationResult, ProcessingStats,
-    QARequest, QAResponse,
+    QARequest, QAResponse, AgentRequest, AgentResponse,
+    AgenticRAGRequest, AgenticRAGResponse, EvaluationMetricsResponse,
 )
 from app.services.search_service import search_documents, search_from_db
 from app.core.database import SessionLocal
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+def _process_many_in_background(doc_ids: list[str], rebuild_indexes: bool = False):
+    from app.services.document_processor import process_document
+
+    db_bg = SessionLocal()
+    try:
+        if rebuild_indexes:
+            from app.services.rag_service import reset_index
+            from app.services.search_service import reset_search_index
+
+            reset_search_index()
+            reset_index()
+
+        for doc_id in doc_ids:
+            try:
+                process_document(doc_id, db_bg)
+            except Exception:
+                logger.exception("Batch processing failed for %s", doc_id)
+    finally:
+        db_bg.close()
 
 
 @router.post("/documents/upload", response_model=DocumentResponse)
@@ -86,6 +109,107 @@ async def list_documents(
     return q.order_by(Document.uploaded_at.desc()).offset(skip).limit(limit).all()
 
 
+@router.post("/documents/import-samples")
+async def import_sample_contracts(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Import configured local sample contracts for thesis/demo evaluation."""
+    source_dir = Path(settings.SAMPLE_CONTRACTS_DIR).expanduser()
+    if not source_dir.exists() or not source_dir.is_dir():
+        raise HTTPException(404, f"Sample contracts folder not found: {source_dir}")
+
+    settings.DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
+    imported_docs: list[Document] = []
+    skipped: list[dict] = []
+
+    for source_path in sorted(source_dir.iterdir()):
+        if not source_path.is_file():
+            continue
+        suffix = source_path.suffix.lower()
+        if suffix not in settings.SUPPORTED_FORMATS:
+            skipped.append({"filename": source_path.name, "reason": "unsupported_format"})
+            continue
+
+        file_size = source_path.stat().st_size
+        if file_size > settings.MAX_FILE_SIZE_MB * 1024 * 1024:
+            skipped.append({"filename": source_path.name, "reason": "file_too_large"})
+            continue
+
+        existing = db.query(Document).filter(
+            Document.original_filename == source_path.name,
+            Document.file_size == file_size,
+        ).first()
+        if existing:
+            skipped.append({"filename": source_path.name, "reason": "already_imported"})
+            continue
+
+        doc_id = str(uuid.uuid4())
+        filename = f"{doc_id}{suffix}"
+        file_path = settings.DOCUMENTS_DIR / filename
+        shutil.copyfile(source_path, file_path)
+
+        mime_type, _ = mimetypes.guess_type(str(source_path))
+        doc = Document(
+            id=doc_id,
+            filename=filename,
+            original_filename=source_path.name,
+            file_path=str(file_path),
+            file_size=file_size,
+            mime_type=mime_type or "application/pdf",
+            doc_type=DocumentType.CONTRACT,
+        )
+        db.add(doc)
+        imported_docs.append(doc)
+
+    db.commit()
+    imported_payload = [
+        {"id": doc.id, "filename": doc.original_filename}
+        for doc in imported_docs
+    ]
+    imported_ids = [doc.id for doc in imported_docs]
+    if imported_ids:
+        background_tasks.add_task(_process_many_in_background, imported_ids, False)
+
+    return {
+        "message": f"Queued {len(imported_ids)} sample contract(s) for processing.",
+        "source_dir": str(source_dir),
+        "imported_count": len(imported_ids),
+        "skipped_count": len(skipped),
+        "imported": imported_payload,
+        "skipped": skipped,
+    }
+
+
+@router.post("/documents/reprocess")
+async def reprocess_documents(
+    background_tasks: BackgroundTasks,
+    contract_only: bool = False,
+    db: Session = Depends(get_db),
+):
+    """Re-process the current corpus and rebuild keyword/semantic indexes."""
+    q = db.query(Document)
+    if contract_only:
+        q = q.filter(Document.doc_type == DocumentType.CONTRACT)
+    docs = q.order_by(Document.uploaded_at.asc()).all()
+    if not docs:
+        raise HTTPException(404, "No documents found to reprocess")
+
+    doc_ids = [doc.id for doc in docs]
+    db.query(Extraction).filter(Extraction.document_id.in_(doc_ids)).delete(synchronize_session=False)
+    db.query(ProcessingLog).filter(ProcessingLog.document_id.in_(doc_ids)).delete(synchronize_session=False)
+    for doc in docs:
+        doc.status = DocumentStatus.UPLOADED
+        doc.processed_at = None
+        doc.processing_time_ms = None
+    db.commit()
+
+    background_tasks.add_task(_process_many_in_background, doc_ids, True)
+    return {
+        "message": f"Queued {len(doc_ids)} document(s) for reprocessing.",
+        "queued_count": len(doc_ids),
+        "contract_only": contract_only,
+        "rebuild_indexes": True,
+    }
+
+
 @router.get("/documents/{doc_id}", response_model=DocumentDetailResponse)
 async def get_document(doc_id: str, db: Session = Depends(get_db)):
     """Get document details with extractions."""
@@ -93,7 +217,10 @@ async def get_document(doc_id: str, db: Session = Depends(get_db)):
     if not doc:
         raise HTTPException(404, "Document not found")
     extractions = db.query(Extraction).filter(Extraction.document_id == doc_id).all()
-    return {"document": doc, "extractions": extractions}
+    processing_logs = db.query(ProcessingLog).filter(
+        ProcessingLog.document_id == doc_id
+    ).order_by(ProcessingLog.created_at.asc()).all()
+    return {"document": doc, "extractions": extractions, "processing_logs": processing_logs}
 
 
 @router.delete("/documents/{doc_id}")
@@ -105,6 +232,7 @@ async def delete_document(doc_id: str, db: Session = Depends(get_db)):
     file_path = Path(doc.file_path)
     if file_path.exists():
         file_path.unlink()
+    db.query(ProcessingLog).filter(ProcessingLog.document_id == doc_id).delete()
     db.delete(doc)
     db.commit()
     return {"message": "Document deleted"}
@@ -120,6 +248,7 @@ async def reprocess_document(
         raise HTTPException(404, "Document not found")
     # Clear old extractions
     db.query(Extraction).filter(Extraction.document_id == doc_id).delete()
+    db.query(ProcessingLog).filter(ProcessingLog.document_id == doc_id).delete()
     db.commit()
     def _reprocess_in_background(doc_id: str):
         from app.services.document_processor import process_document
@@ -163,6 +292,33 @@ async def ask_all_documents(request: QARequest, db: Session = Depends(get_db)):
     return answer_question_all_docs(request.question, db)
 
 
+@router.post("/agent/ask", response_model=AgentResponse)
+async def agent_ask(request: AgentRequest, db: Session = Depends(get_db)):
+    """Ask through the backend agent router."""
+    from app.services.agent_service import ask_agent
+    return ask_agent(
+        question=request.question,
+        db=db,
+        document_id=request.document_id,
+        document_ids=request.document_ids,
+        mode=request.mode,
+        limit=request.limit,
+    )
+
+
+@router.post("/agentic-rag/ask", response_model=AgenticRAGResponse)
+async def agentic_rag_ask(request: AgenticRAGRequest, db: Session = Depends(get_db)):
+    """Ask through the agentic RAG workflow."""
+    from app.services.agentic_rag_service import answer_agentic_rag
+    return answer_agentic_rag(
+        question=request.question,
+        db=db,
+        document_id=request.document_id,
+        document_ids=request.document_ids,
+        max_evidence=request.max_evidence,
+    )
+
+
 @router.post("/search", response_model=list[SearchResult])
 async def search(request: SearchRequest, db: Session = Depends(get_db)):
     """Search documents by keyword or natural language query."""
@@ -187,3 +343,10 @@ async def get_stats(db: Session = Depends(get_db)):
         failed=failed or 0, review_needed=review or 0,
         avg_processing_time_ms=round(avg_time, 2) if avg_time else None,
     )
+
+
+@router.get("/evaluation/metrics", response_model=EvaluationMetricsResponse)
+async def evaluation_metrics(db: Session = Depends(get_db)):
+    """Compute evaluation metrics from benchmark data and recorded processing results."""
+    from app.services.evaluation_service import get_evaluation_metrics
+    return get_evaluation_metrics(db)

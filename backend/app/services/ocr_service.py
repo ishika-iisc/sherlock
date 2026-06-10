@@ -62,7 +62,6 @@ class OCRService:
             image.save(tmp)
             easyocr_result = self.extract_with_easyocr(str(tmp))
 
-        # Pick the result with more text content
         if len(easyocr_result["full_text"]) > len(tesseract_result["full_text"]):
             best = easyocr_result
             best["alt_source"] = tesseract_result

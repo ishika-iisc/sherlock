@@ -94,16 +94,16 @@ def extract_entities_llm(text: str) -> list[dict]:
     system = "You are a document data extraction assistant. Extract key fields and return ONLY valid JSON."
     user = f"""Extract the following fields from this document text. Return a JSON array of objects with "field_name" and "field_value" keys.
 
-Fields to extract: contract_number, amendment_number, parties (who are the parties), date, amount, vendor_name, buyer_name, email, registered_number, vat_number, contract_term, payment_terms
+Fields to extract: contract_number, amendment_number, parties (who are the parties), date, amount, vendor_name, buyer_name, email, registered_number, vat_number, contract_term, payment_terms, governing_law, termination_notice, liability_cap
 
 If a field is not found, skip it. Only extract what is clearly stated.
 
 Document text:
-{text[:2500]}
+{text[:1800]}
 
 Return ONLY a JSON array like: [{{"field_name": "contract_number", "field_value": "8012"}}]"""
 
-    response = generate(system, user, max_tokens=500, temperature=0.0)
+    response = generate(system, user, max_tokens=260, temperature=0.0)
 
     import json
     try:

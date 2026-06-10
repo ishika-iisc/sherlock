@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { getDocuments, deleteDocument } from '../services/api';
+import { FolderInput, RefreshCw } from 'lucide-react';
+import { getDocuments, deleteDocument, importSampleContracts, reprocessDocuments } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Documents() {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [operation, setOperation] = useState(null);
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   const load = () => {
@@ -21,11 +24,58 @@ export default function Documents() {
     load();
   };
 
+  const runImportSamples = async () => {
+    setOperation('import');
+    setMessage('');
+    try {
+      const res = await importSampleContracts();
+      const imported = res.data?.imported_count ?? 0;
+      const skipped = res.data?.skipped_count ?? 0;
+      setMessage(`Queued ${imported} sample contract(s). ${skipped} file(s) skipped.`);
+      load();
+    } catch (err) {
+      setMessage(err?.response?.data?.detail || 'Sample import failed.');
+    } finally {
+      setOperation(null);
+    }
+  };
+
+  const runReprocessAll = async () => {
+    if (!confirm('Reprocess all documents and rebuild the search/RAG indexes?')) return;
+    setOperation('reprocess');
+    setMessage('');
+    try {
+      const res = await reprocessDocuments(false);
+      setMessage(res.data?.message || 'Reprocessing started.');
+      load();
+    } catch (err) {
+      setMessage(err?.response?.data?.detail || 'Reprocess failed.');
+    } finally {
+      setOperation(null);
+    }
+  };
+
   if (loading) return <div className="loading">Loading documents...</div>;
 
   return (
     <div>
-      <h2 style={{ marginBottom: 20 }}>Documents</h2>
+      <div className="section-heading">
+        <div>
+          <h2>Documents</h2>
+          <p className="section-subtitle">Manage the corpus used for contract extraction, retrieval, and thesis evaluation.</p>
+        </div>
+        <div className="document-actions">
+          <button className="btn btn-secondary" onClick={runImportSamples} disabled={Boolean(operation)}>
+            <FolderInput size={16} />
+            {operation === 'import' ? 'Importing...' : 'Import sample contracts'}
+          </button>
+          <button className="btn btn-primary" onClick={runReprocessAll} disabled={Boolean(operation) || docs.length === 0}>
+            <RefreshCw size={16} />
+            {operation === 'reprocess' ? 'Reprocessing...' : 'Reprocess corpus'}
+          </button>
+        </div>
+      </div>
+      {message && <div className="operation-message">{message}</div>}
       {docs.length === 0 ? (
         <div className="card"><p style={{ color: '#666' }}>No documents uploaded yet.</p></div>
       ) : (
