@@ -1,0 +1,60 @@
+\chapter{Conclusion and PhD Research Agenda}
+\label{chap:conclusion}
+
+\section{Conclusion}
+\paragraph{} This thesis presents a research-oriented document intelligence prototype for visually rich business documents. The work moves beyond a simple application implementation by framing the system as an evidence-graded Agentic RAG framework. The framework combines uncertainty-aware document extraction, validation, structured lookup, semantic retrieval, evidence grading, and grounded generation.
+
+\paragraph{} The central research claim is that trustworthy document question answering requires explicit intermediate decisions. A system should know when to answer from structured fields, when to retrieve context, whether retrieved context is sufficient, and when to ask for human review. This is particularly important for business documents where wrong answers can affect financial, contractual, or operational decisions.
+
+\paragraph{} The current pilot results show that the prototype is measurable and functional. The field extraction F1 score of 0.8, Search MRR of 1.0, throughput of 29.77 documents per hour, and review rate of 0.152 demonstrate that the system has reached a useful proof-of-concept stage. At the same time, the lower Search Precision@5 and missing QA benchmark show that the work is not yet complete as a research contribution. This honest gap is valuable because it defines the next research steps.
+
+\section{Research Contributions}
+\paragraph{} The thesis contributes:
+
+\begin{enumerate}
+    \item A working full-stack prototype for document-grounded extraction, search, and QA.
+    \item An uncertainty-aware representation layer that preserves confidence, validation, review, and trace information.
+    \item An evidence-graded Agentic RAG workflow that separates planning, structured lookup, retrieval, evidence scoring, and answer generation.
+    \item A baseline comparison plan for evaluating whether each system component improves trustworthiness.
+    \item A PhD-ready research agenda for trustworthy multimodal document intelligence.
+\end{enumerate}
+
+\section{Why This Can Support PhD Applications}
+\paragraph{} A PhD proposal is usually evaluated on research potential rather than only implementation effort. This project can support PhD applications because it has a practical prototype, a clear research gap, measurable preliminary results, and a natural path to publishable experiments. It connects to active research areas: Document AI, RAG evaluation, hallucination detection, multimodal retrieval, human-in-the-loop validation, and trustworthy AI.
+
+\paragraph{} The most compelling PhD positioning is:
+
+\begin{quote}
+Trustworthy document intelligence requires uncertainty-aware extraction and evidence-graded generation, especially for visually rich business documents where answer correctness must be traceable to document evidence.
+\end{quote}
+
+\section{Limitations}
+\paragraph{} The current work has several limitations. The benchmark dataset is small. The QA evaluation is not yet labelled. The document understanding model is not fine-tuned on project-specific data. Table extraction and layout modelling can be improved. The system currently runs locally and does not yet include production-grade authentication, access control, audit governance, or scalable vector storage.
+
+\paragraph{} These limitations should not be hidden. They should be presented as the motivation for future research. A strong PhD proposal often begins with a working prototype and then identifies the deeper unresolved research questions.
+
+\section{PhD Research Agenda}
+\paragraph{} The following research agenda can extend this M.Tech work into a PhD proposal:
+
+\begin{enumerate}
+    \item \textbf{Dataset construction}: Build a labelled benchmark of visually rich business documents with fields, evidence spans, retrieval relevance, and QA annotations.
+    \item \textbf{Uncertainty propagation}: Study how OCR confidence, extraction confidence, validation flags, and retrieval scores can be combined into answer-level confidence.
+    \item \textbf{Evidence sufficiency modelling}: Develop methods that decide whether retrieved evidence is enough to answer safely.
+    \item \textbf{Multimodal retrieval}: Retrieve not only text chunks but also layout regions, table cells, page positions, and document structure.
+    \item \textbf{Faithfulness evaluation}: Measure unsupported claims and citation correctness using both automatic metrics and expert human evaluation.
+    \item \textbf{Human-in-the-loop learning}: Use reviewer corrections to improve extraction, validation, retrieval, and answer generation over time.
+    \item \textbf{Deployment and governance}: Study privacy, access control, auditability, and compliance for enterprise document intelligence.
+\end{enumerate}
+
+\section{Potential Publication Directions}
+\paragraph{} The work can be shaped into several publication directions:
+
+\begin{enumerate}
+    \item A systems paper on evidence-graded Agentic RAG for document intelligence.
+    \item An evaluation paper on benchmark design for visually rich business document QA.
+    \item A methods paper on uncertainty propagation from OCR and extraction into RAG answer confidence.
+    \item An applied AI paper on human-in-the-loop validation for trustworthy document extraction.
+\end{enumerate}
+
+\section{Final Remarks}
+\paragraph{} The current project is a strong foundation for an M.Tech thesis and can be reshaped into a credible PhD research proposal. Selection for a PhD program cannot be guaranteed, but the research-centric version strengthens the case by clearly identifying novelty, research questions, hypotheses, baselines, metrics, limitations, and future research directions. The next major step is to expand the dataset and run comparative experiments against the defined baselines.

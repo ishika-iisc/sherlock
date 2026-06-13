@@ -1,0 +1,55 @@
+\chapter{API Endpoints}
+\label{appendix:api_endpoints}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\midrule
+POST & \texttt{/api/v1/documents/upload} & Upload document for processing \\
+GET & \texttt{/api/v1/documents} & List uploaded documents \\
+GET & \texttt{/api/v1/documents/\{id\}} & Fetch document details and extractions \\
+DELETE & \texttt{/api/v1/documents/\{id\}} & Delete document and related records \\
+POST & \texttt{/api/v1/documents/\{id\}/reprocess} & Re-run document processing \\
+GET & \texttt{/api/v1/documents/\{id\}/validate} & Validate extracted fields \\
+POST & \texttt{/api/v1/documents/\{id\}/ask} & Ask a question about one document \\
+POST & \texttt{/api/v1/ask} & Ask a question across all documents \\
+POST & \texttt{/api/v1/agent/ask} & Ask through backend agent router \\
+POST & \texttt{/api/v1/agentic-rag/ask} & Ask using Agentic RAG workflow \\
+POST & \texttt{/api/v1/search} & Search documents \\
+GET & \texttt{/api/v1/stats} & Get processing statistics \\
+GET & \texttt{/api/v1/evaluation/metrics} & Get evaluation metrics \\
+\bottomrule
+\end{tabular}
+\caption{Major backend API endpoints}
+\label{tab:api_endpoints}
+\end{table}
+
+\chapter{Prototype Configuration}
+\label{appendix:configuration}
+
+\paragraph{} The prototype uses the following important configuration values:
+
+\begin{enumerate}
+    \item API prefix: \texttt{/api/v1}
+    \item Local database: \texttt{sqlite:///./doc\_intelligence.db}
+    \item Supported formats: PDF, PNG, JPG, JPEG, TIFF, and DOCX
+    \item Maximum file size: 50 MB
+    \item VLM model: \texttt{microsoft/layoutlmv3-base}
+    \item Embedding model: \texttt{all-MiniLM-L6-v2}
+    \item Confidence threshold: 0.7
+\end{enumerate}
+
+\chapter{Recommended Screenshots for Final Submission}
+\label{appendix:screenshots}
+
+\paragraph{} The final submitted report should include screenshots of the following pages after personal details and final data are confirmed:
+
+\begin{enumerate}
+    \item Dashboard page showing document counts and processing summary.
+    \item Upload page showing the document upload workflow.
+    \item Document detail page showing extracted fields and processing logs.
+    \item Search page showing document retrieval results.
+    \item Agentic RAG page showing answer, evidence snippets, confidence, and trace steps.
+\end{enumerate}

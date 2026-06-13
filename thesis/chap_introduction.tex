@@ -1,0 +1,51 @@
+\chapter{Introduction}
+\label{chap:introduction}
+
+\paragraph{} Digital transformation has increased the volume of electronic records handled by organisations, but many business processes still depend on documents that are not immediately machine-actionable. Invoices, contracts, purchase orders, reports, scanned forms, and supporting files may be available as PDFs or images, yet the information required by downstream workflows is often hidden inside free-form text, tables, inconsistent layouts, and scanned pages. Manual processing of such documents requires human effort for reading, extracting key fields, validating values, searching past records, and answering business questions. This approach becomes expensive and slow as the number of documents grows.
+
+\paragraph{} Traditional OCR systems convert document images into text, but text extraction alone is not enough for end-to-end document intelligence. A useful system must also classify document type, preserve useful layout information, extract structured fields, detect uncertain outputs, validate extracted values, support retrieval, and provide human-readable answers grounded in document evidence. Recent progress in transformer-based language models, document vision-language models, sentence embeddings, and retrieval-augmented generation makes it possible to build such systems as integrated applications.
+
+\section{Problem Statement}
+\paragraph{} The problem addressed in this project is the design and implementation of a practical AI-powered document intelligence system that can ingest business documents, extract structured information, validate the extracted fields, support document search, and answer natural-language questions over uploaded documents. The system should be usable through a web interface, maintain processing history, expose backend APIs, and provide auditable evidence for question-answering outputs.
+
+\paragraph{} The project focuses on the following research and engineering question:
+
+\begin{quote}
+How can OCR, document layout understanding, rule-based validation, semantic retrieval, and language-model-based answering be integrated into a usable document intelligence pipeline for semi-structured business documents?
+\end{quote}
+
+\section{Motivation}
+\paragraph{} Document-heavy workflows often suffer from three practical gaps. First, extraction systems may produce raw text but not structured fields. Second, extracted values may be wrong or incomplete, but users are not told which fields require review. Third, users may need to ask questions across documents, but conventional search interfaces only return files or snippets. The proposed system addresses these gaps by combining extraction, validation, search, and question answering in one workflow.
+
+\paragraph{} The project is motivated by real-world use cases such as invoice processing, contract review, compliance checks, document search, and operational knowledge discovery. For example, a user may upload a contract and ask for its effective date, parties, payment terms, or risky clauses. A reliable system should answer using evidence from the document, indicate confidence, and avoid inventing values that are not present.
+
+\section{Objectives}
+\paragraph{} The main objectives of the project are:
+
+\begin{enumerate}
+    \item To build a web-based document intelligence prototype with document upload, dashboard, document listing, search, and question-answering screens.
+    \item To implement a backend processing pipeline for text extraction, scanned-document OCR, document classification, entity extraction, validation, and indexing.
+    \item To combine OCR and layout-aware document analysis for improved handling of digital and scanned documents.
+    \item To store documents, extracted fields, processing logs, and status information in a persistent database.
+    \item To implement RAG and Agentic RAG workflows for grounded question answering over uploaded documents.
+    \item To evaluate the prototype using extraction, search, throughput, and review-rate metrics.
+\end{enumerate}
+
+\section{Scope of the Work}
+\paragraph{} The system is implemented as a prototype rather than a production enterprise platform. It supports common document formats such as PDF, PNG, JPG, JPEG, TIFF, and DOCX, with a maximum file size configured in the backend. The backend uses SQLite for local persistence and stores uploaded files in a configurable storage directory. The frontend provides the main user interface, while FastAPI exposes REST endpoints for upload, document operations, validation, search, statistics, evaluation metrics, and question answering.
+
+\paragraph{} The current implementation emphasises practical integration. It uses direct PDF text extraction for digital PDFs, OCR for scanned pages, LayoutLMv3 for document classification and layout features, rule-based entity extraction, optional LLM-assisted extraction, validation rules, keyword and database-backed search, semantic chunk retrieval, and a local LLM-backed answer generator.
+
+\section{Contributions}
+\paragraph{} The major contributions of this project are as follows:
+
+\begin{enumerate}
+    \item A modular document processing pipeline that separates ingestion, extraction, classification, fusion, validation, indexing, and status tracking.
+    \item A confidence-aware extraction model that flags fields for review when confidence is low or validation rules fail.
+    \item A web application that exposes document upload, dashboard, document details, search, and Agentic RAG interfaces.
+    \item An Agentic RAG workflow that plans user questions, retrieves and grades evidence, and generates grounded answers with traceable evidence snippets.
+    \item An evaluation layer that reports implemented benchmark metrics such as extraction F1, search precision, search MRR, throughput, and review rate.
+\end{enumerate}
+
+\section{Organisation of the Report}
+\paragraph{} The remainder of this report is organised as follows. \cref{chap:literature_review} reviews OCR, document AI, entity extraction, validation, search, and retrieval-augmented question answering. \cref{chap:methodology} describes the system architecture, backend pipeline, database model, and Agentic RAG workflow. \cref{chap:experiments_and_results} presents the prototype setup, evaluation metrics, and observed results. \cref{chap:conclusion} concludes the report and discusses limitations and future work.

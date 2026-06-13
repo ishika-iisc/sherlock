@@ -1,0 +1,61 @@
+\chapter{Introduction}
+\label{chap:introduction}
+
+\paragraph{} Business and institutional workflows depend heavily on visually rich documents: invoices, contracts, purchase orders, reports, scanned forms, and supporting records. These documents contain information in text, layout, tables, headers, footers, signatures, and page ordering. Although large language models can answer natural-language questions, and OCR can convert images into text, neither component alone is sufficient for trustworthy document intelligence. The central challenge is not only reading a document, but deciding which extracted information is reliable, which evidence supports an answer, and when the system should decline or request human review.
+
+\paragraph{} Recent research in Document AI has introduced multimodal models such as LayoutLMv3 for text-layout-image understanding \cite{huang2022layoutlmv3}, OCR-free document understanding approaches such as Donut \cite{kim2022donut}, and more practical benchmarks for visually rich documents such as DUDE \cite{vanlandeghem2023dude}. At the same time, RAG has become a dominant pattern for grounding language model outputs in external knowledge \cite{lewis2020rag}. However, RAG does not eliminate hallucination by itself. Retrieved evidence can be irrelevant, incomplete, or contradictory, and generated answers can still include unsupported claims \cite{niu2024ragtruth}.
+
+\section{Research Motivation}
+\paragraph{} Most practical document intelligence systems are evaluated as engineering pipelines: upload a document, extract fields, index text, and answer questions. For an M.Tech project this is useful, but for a research-oriented thesis the deeper question is whether the pipeline improves trustworthiness in a measurable way. In document-heavy domains, an answer is useful only if it is traceable to reliable evidence. A wrong amount, an unsupported contract interpretation, or an invented date can be more damaging than no answer.
+
+\paragraph{} This project therefore reframes the implemented application as a research prototype for uncertainty-aware and evidence-graded document question answering. The goal is to study whether explicit intermediate decisions can improve reliability: field extraction confidence, validation status, retrieval relevance, evidence grading, answer confidence, and human-review routing.
+
+\section{Research Gap}
+\paragraph{} The literature suggests three gaps that motivate this thesis:
+
+\begin{enumerate}
+    \item \textbf{Extraction-to-answer uncertainty gap}: Document AI systems often report extraction confidence, while RAG systems focus on retrieval and generation. There is limited integration between extraction uncertainty and downstream question-answer confidence.
+    \item \textbf{Evidence selection gap}: Direct RAG pipelines retrieve chunks but do not always explicitly grade whether the retrieved context is sufficient for the question. This is problematic for long, multi-page, visually structured documents.
+    \item \textbf{Evaluation gap}: RAG systems are difficult to evaluate because retrieval, generation, faithfulness, and answer relevance are separate dimensions \cite{es2023ragas}. Document intelligence systems additionally need extraction accuracy, review rate, and layout-sensitive benchmarks.
+\end{enumerate}
+
+\section{Research Questions}
+\paragraph{} The thesis is structured around the following research questions:
+
+\begin{enumerate}
+    \item \textbf{RQ1}: How can OCR, layout-aware document understanding, rule-based extraction, and validation be combined to produce uncertainty-aware document representations?
+    \item \textbf{RQ2}: Does structured-field lookup improve exact-field question answering compared with direct RAG over extracted text?
+    \item \textbf{RQ3}: Does evidence grading improve the reliability of RAG answers by filtering weak or irrelevant retrieved chunks before generation?
+    \item \textbf{RQ4}: What evaluation protocol can jointly measure extraction quality, retrieval quality, answer faithfulness, latency, and human-review load for document intelligence?
+\end{enumerate}
+
+\section{Hypotheses}
+\paragraph{} The research questions lead to the following hypotheses:
+
+\begin{enumerate}
+    \item \textbf{H1}: A hybrid extraction pipeline combining digital text extraction, OCR, layout-aware classification, and validation will produce more useful document representations than OCR text alone.
+    \item \textbf{H2}: For exact factual questions, structured-field lookup will reduce latency and unsupported generation compared with direct RAG.
+    \item \textbf{H3}: Evidence grading before generation will improve answer faithfulness and reduce unsupported claims compared with a direct retrieve-and-generate baseline.
+    \item \textbf{H4}: A multi-metric evaluation protocol will reveal trade-offs that single aggregate scores miss, especially between accuracy, retrieval quality, latency, and review effort.
+\end{enumerate}
+
+\section{Proposed Research Contribution}
+\paragraph{} The proposed contribution is an evidence-graded Agentic RAG framework for trustworthy document intelligence. The framework uses a modular pipeline that first creates an uncertainty-aware document representation, then performs query planning, structured lookup, evidence retrieval, evidence grading, and grounded answer generation. The framework is not presented as a final solved system; rather, it is a research scaffold for studying reliability, uncertainty propagation, and evaluation in document-grounded question answering.
+
+\paragraph{} The expected research contributions are:
+
+\begin{enumerate}
+    \item A reproducible full-stack prototype for document intelligence over uploaded business documents.
+    \item An uncertainty-aware extraction and validation layer that stores confidence, review flags, and processing logs.
+    \item An Agentic RAG workflow that separates query planning, structured lookup, retrieval, evidence grading, and generation.
+    \item A baseline comparison design covering OCR-only, direct RAG, structured extraction plus RAG, and evidence-graded Agentic RAG.
+    \item A PhD-oriented research agenda for trustworthy multimodal document intelligence.
+\end{enumerate}
+
+\section{Scope and Assumptions}
+\paragraph{} The current system is a local research prototype. It supports PDF and image-based document inputs, stores metadata and extracted fields in SQLite, and serves a React frontend through a FastAPI backend. The prototype uses available OCR, embedding, and language-model components rather than training all models from scratch. This is appropriate for the present thesis because the research focus is integration, uncertainty-aware orchestration, and evaluation design.
+
+\paragraph{} The current benchmark is small and should be interpreted as pilot evidence. For a PhD-level continuation, the dataset should be expanded with labelled fields, document-level labels, retrieval relevance judgments, and question-answer pairs. The proposed future work section defines this path explicitly.
+
+\section{Organisation of the Report}
+\paragraph{} The remainder of this report is organised as follows. \cref{chap:literature_review} reviews Document AI, OCR, layout-aware understanding, RAG, hallucination, and evaluation literature. \cref{chap:methodology} presents the proposed evidence-graded Agentic RAG framework and implementation. \cref{chap:experiments_and_results} describes pilot results and a research-grade evaluation protocol. \cref{chap:conclusion} summarises the thesis and proposes a PhD research agenda.

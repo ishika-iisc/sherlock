@@ -1,0 +1,42 @@
+\chapter{Literature Review}
+\label{chap:literature_review}
+
+\section{Document AI and Visually Rich Documents}
+\paragraph{} Intelligent Document Processing has evolved from OCR-based text extraction into multimodal document understanding. Visually rich documents contain textual content, spatial layout, tables, logos, signatures, section hierarchy, and page-level structure. Therefore, document understanding requires more than converting images into plain text.
+
+\paragraph{} LayoutLMv3 represents a major direction in multimodal document AI. It pre-trains document representations using unified text and image masking and learns alignment between words and image patches \cite{huang2022layoutlmv3}. Such models are useful because key-value relations in documents are often spatial rather than purely sequential. For example, an amount near a ``Total'' label has a different meaning from an amount inside a paragraph.
+
+\paragraph{} OCR-free models such as Donut challenge the classical OCR-first pipeline by directly mapping document images to structured outputs \cite{kim2022donut}. These approaches reduce dependence on OCR quality, but they usually require significant training data and compute. For a practical research prototype, the hybrid OCR plus layout-aware path remains useful because it can run locally, expose intermediate confidence values, and support human audit.
+
+\section{Practical Benchmarks for Document Understanding}
+\paragraph{} Earlier document AI datasets often focused on narrow tasks such as receipts or forms. More recent benchmarks emphasise multi-domain, multi-page, and visually rich settings. The DUDE benchmark argues that practical document understanding needs evaluation scenarios closer to real-world documents, with diverse questions, answers, layouts, and domains \cite{vanlandeghem2023dude}. This is important for the present thesis because the target documents are business documents rather than one fixed template.
+
+\paragraph{} A research-centric thesis should therefore not evaluate only whether the app runs. It should evaluate extraction accuracy, retrieval ranking, document QA, faithfulness, latency, and review burden across varied documents. This motivates the multi-metric protocol proposed in \cref{chap:experiments_and_results}.
+
+\section{OCR and Extraction Uncertainty}
+\paragraph{} OCR remains a foundational component in many document systems. Tesseract is a widely used open-source OCR engine \cite{smith2007tesseract}, and EasyOCR provides ready-to-use OCR models across many scripts and languages \cite{easyocr2026}. However, OCR systems can fail on low-resolution scans, rotated pages, poor contrast, unusual fonts, handwritten content, and complex tables.
+
+\paragraph{} A key research issue is uncertainty propagation. OCR may provide word-level confidence, extraction rules may provide field-level confidence, and validation rules may flag suspicious values. Yet many RAG systems discard this uncertainty and pass all extracted text to a retriever. This thesis argues that document QA should preserve uncertainty signals and use them during answer generation and review routing.
+
+\section{Retrieval-Augmented Generation}
+\paragraph{} RAG combines retrieved external context with a parametric language model \cite{lewis2020rag}. It is useful for document intelligence because it allows answers to be grounded in uploaded documents instead of relying on model memory. However, RAG is not a guarantee of factuality. Retrieval may miss relevant evidence, retrieve only partial context, or surface misleading text. The generator can also introduce unsupported claims.
+
+\paragraph{} Self-RAG extends this direction by introducing self-reflection over retrieval and generation decisions \cite{asai2023selfrag}. The idea that a system should decide when to retrieve, critique retrieved passages, and critique its own output is relevant to the present work. The proposed Agentic RAG workflow is simpler and engineering-oriented, but follows a similar research motivation: expose intermediate decisions and reduce unsupported answers.
+
+\section{Groundedness and Hallucination in RAG}
+\paragraph{} Recent studies show that groundedness remains an open problem in retrieval-augmented long-form generation \cite{gao2024groundedness}. Even with retrieved context, generated answers may include claims that are unsupported by evidence. RAGTruth further shows the value of hallucination corpora for trustworthy retrieval-augmented language models, including word-level annotations of unsupported claims \cite{niu2024ragtruth}.
+
+\paragraph{} These works motivate evidence grading and answer faithfulness metrics in this thesis. A document QA system should not only retrieve chunks; it should estimate whether the chunks actually support the requested answer. If the evidence is weak, the system should respond with insufficient evidence rather than generate a confident answer.
+
+\section{RAG Evaluation}
+\paragraph{} RAG evaluation is multi-dimensional. RAGAS proposes reference-free metrics for evaluating retrieval-augmented generation, including dimensions related to context relevance, answer faithfulness, and answer relevance \cite{es2023ragas}. This is useful because labelled answers are expensive to create, especially for domain-specific documents.
+
+\paragraph{} For this thesis, RAG evaluation is combined with document-specific metrics. Extraction F1 measures whether structured fields are correctly extracted. Precision@k and MRR measure retrieval ranking. Faithfulness and unsupported-claim rate measure whether generated answers stay grounded. Review rate measures how often the system requires human verification. Latency and throughput measure operational feasibility.
+
+\section{Research Positioning}
+\paragraph{} The proposed work is positioned between three research areas: Document AI, trustworthy RAG, and human-in-the-loop validation. It does not claim to introduce a new transformer architecture. Instead, its research novelty lies in the orchestration and evaluation of a document-grounded QA pipeline that preserves uncertainty signals, routes exact questions through structured fields, grades evidence before generation, and exposes traceable outputs.
+
+\paragraph{} This positioning is appropriate for a PhD proposal because it opens several research extensions: uncertainty propagation from OCR to RAG, multimodal retrieval over text and layout, evidence sufficiency estimation, hallucination-aware answer generation, and benchmark construction for document-grounded QA.
+
+\section{Summary}
+\paragraph{} The literature indicates that trustworthy document intelligence remains an active research area. OCR, layout-aware models, RAG, and LLMs each solve part of the problem, but the end-to-end reliability question remains unresolved. This thesis addresses that gap by proposing and prototyping an evidence-graded Agentic RAG framework for visually rich business documents.

@@ -1,0 +1,44 @@
+\chapter{Conclusions and Future Work}
+\label{chap:conclusion}
+
+\section{Conclusion}
+\paragraph{} This project designed and implemented an AI-powered document intelligence system for automated extraction, validation, search, and question answering. The system addresses the practical problem of converting semi-structured and unstructured business documents into searchable, validated, and queryable knowledge. It provides a web-based interface for users and a FastAPI backend that executes the core processing pipeline.
+
+\paragraph{} The implemented prototype supports document upload, digital PDF text extraction, scanned-document OCR, layout-aware document classification, entity extraction, validation, keyword search, semantic retrieval, and RAG-based question answering. The database stores document metadata, full text, extracted fields, processing status, processing logs, and question-answer history. The system therefore supports both automation and auditability.
+
+\paragraph{} A key contribution of this project is the Agentic RAG workflow. Instead of using a direct prompt-only approach, the workflow plans the question, attempts structured-field lookup, retrieves candidate evidence, grades evidence, builds a grounded context, and produces an answer with confidence and supporting snippets. This design is especially useful for document intelligence because users need answers that can be traced back to uploaded documents.
+
+\paragraph{} The prototype was evaluated using implemented benchmark and telemetry metrics. It achieved a Field Extraction F1 score of 0.8, Search Precision@5 of 0.25, Search MRR of 1.0, estimated throughput of 29.77 documents per hour, and review rate of 0.152. These values demonstrate that the prototype is functional and measurable, while also showing the need for broader datasets and improved ranking.
+
+\section{Key Learnings}
+\paragraph{} The project produced several important learnings:
+
+\begin{enumerate}
+    \item Digital PDFs and scanned documents require different processing paths. Direct text extraction is preferable for digital PDFs, while scanned documents require OCR and layout-aware handling.
+    \item OCR output alone is insufficient for reliable document intelligence. Confidence values, validation rules, and review flags are necessary to support trustworthy workflows.
+    \item Structured-field lookup is faster and more reliable than LLM generation for exact field questions.
+    \item Retrieval quality strongly affects answer quality in RAG systems. Evidence ranking must be evaluated and improved independently from answer generation.
+    \item A working UI is important for evaluating document intelligence because users need to inspect extracted values, logs, evidence, and review flags.
+\end{enumerate}
+
+\section{Limitations}
+\paragraph{} The current system is a prototype and has several limitations. The benchmark dataset is small. QA accuracy has not yet been measured using labelled ground-truth answers. Table extraction is present but can be improved for complex table structures. The LayoutLMv3 component is used for classification and layout features, but the model has not yet been fine-tuned on a project-specific dataset. The application currently uses local SQLite storage and local model execution, which are suitable for development but not sufficient for high-concurrency enterprise deployment.
+
+\paragraph{} The current validation layer uses a mixture of deterministic rules, heuristics, and mock reference data. A production deployment would require integration with real enterprise systems such as ERP, CRM, vendor master, contract repository, identity provider, and audit logging services.
+
+\section{Future Work}
+\paragraph{} Future work can proceed in the following directions:
+
+\begin{enumerate}
+    \item \textbf{Dataset expansion}: collect a larger labelled dataset of invoices, contracts, forms, reports, and scanned documents.
+    \item \textbf{Model fine-tuning}: fine-tune LayoutLMv3 or related models for document type classification, key-value extraction, and layout understanding on project-specific data.
+    \item \textbf{Improved table extraction}: add stronger table detection and structure reconstruction for financial and operational documents.
+    \item \textbf{Hybrid retrieval}: combine lexical ranking, metadata filters, vector search, and reranking to improve Precision@5.
+    \item \textbf{QA benchmarking}: create labelled question-answer pairs and measure exact match, semantic similarity, answer faithfulness, and citation correctness.
+    \item \textbf{Human feedback loop}: allow users to correct extracted fields and use those corrections to improve future extraction.
+    \item \textbf{Production deployment}: add authentication, role-based access, cloud object storage, queue-based workers, persistent vector database, monitoring, and autoscaling.
+    \item \textbf{Security and governance}: add document access controls, audit logs, data retention policies, encryption, and privacy-preserving model execution.
+\end{enumerate}
+
+\section{Final Remarks}
+\paragraph{} The project demonstrates that OCR, document AI, validation, search, and retrieval-augmented question answering can be integrated into a practical full-stack system. While further work is required for production readiness, the prototype provides a strong foundation for an M.Tech project because it combines applied AI methods, software engineering, evaluation, and a working end-user application.

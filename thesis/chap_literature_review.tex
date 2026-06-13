@@ -1,0 +1,43 @@
+\chapter{Literature Review}
+\label{chap:literature_review}
+
+\section{Intelligent Document Processing}
+\paragraph{} Intelligent Document Processing (IDP) refers to the automated conversion of unstructured or semi-structured documents into useful structured data and searchable knowledge. Unlike basic file storage, an IDP system attempts to understand the content of a document, extract key fields, classify the document, and support downstream business actions. Typical IDP pipelines include ingestion, OCR, layout analysis, key-value extraction, table extraction, validation, indexing, and human review.
+
+\paragraph{} Business documents are challenging because their layouts are not fixed. Invoices may use different templates, contracts may have long clauses and nested sections, reports may mix paragraphs and tables, and scanned files may contain skew, noise, low resolution, or missing embedded text. Therefore, a robust system often needs both rule-based and model-based components.
+
+\section{Optical Character Recognition}
+\paragraph{} OCR is the foundation of document digitisation. It converts document images into machine-readable text. Tesseract is a widely used open-source OCR engine whose architecture and practical use have been described by Smith \cite{smith2007tesseract}. Modern OCR workflows often combine character recognition with image preprocessing, page segmentation, word confidence scores, and bounding boxes. In this project, Tesseract is used to extract full text, word-level confidence, and bounding boxes from scanned pages.
+
+\paragraph{} EasyOCR provides another OCR option with ready-to-use recognition models for multiple scripts and languages \cite{easyocr2026}. The prototype uses EasyOCR as an alternate OCR source and compares its output with Tesseract. The longer or more complete text result can be selected as the primary OCR result, while the other result is retained as an alternate source.
+
+\section{Transformer-Based Language Models}
+\paragraph{} Transformer models have changed the design of natural language systems. BERT introduced deep bidirectional contextual representations that can be fine-tuned for many downstream tasks, including question answering and sequence classification \cite{devlin2019bert}. Transformer encoders are useful for document intelligence because document text often contains relationships between fields, labels, values, and surrounding context.
+
+\paragraph{} Sentence-BERT extends transformer models to produce sentence embeddings using Siamese and triplet network structures \cite{reimers2019sentencebert}. Such embeddings are useful for semantic retrieval because they allow text chunks and user queries to be compared in vector space. The project uses the all-MiniLM-L6-v2 sentence embedding model for retrieval indexing and relevant chunk lookup.
+
+\section{Layout-Aware Document Understanding}
+\paragraph{} Plain text alone may lose important visual cues from documents. For example, an amount near a label such as ``Total'' has a different meaning from an amount in a paragraph. Layout-aware models combine textual, spatial, and visual information for document understanding tasks.
+
+\paragraph{} LayoutLMv3 is a multimodal transformer for Document AI that uses unified text and image masking objectives and word-patch alignment during pre-training \cite{huang2022layoutlmv3}. It supports document understanding tasks such as form understanding, receipt understanding, document visual question answering, document image classification, and layout analysis. In this project, LayoutLMv3 is used as the vision-language component for document classification and layout feature extraction.
+
+\section{Information Extraction and Validation}
+\paragraph{} Information extraction identifies structured fields such as invoice number, purchase order number, date, amount, email, vendor name, buyer name, contract parties, and document type. Extraction can be performed using regular expressions, rule-based patterns, sequence labelling models, LLMs, or hybrid methods. In a prototype setting, rule-based extraction is attractive because it is transparent, fast, and easy to debug. However, rules may miss fields expressed in unfamiliar wording, so LLM-assisted extraction can complement them.
+
+\paragraph{} Validation is necessary because extraction confidence alone does not guarantee correctness. A date may be in the future, an amount may be negative or unusually large, an email address may have invalid syntax, or an organisation name may be a generic word rather than a company. The system therefore applies validation rules after extraction and marks uncertain fields for human review.
+
+\section{Search and Retrieval}
+\paragraph{} Document search allows users to find documents based on keywords, extracted fields, or natural language queries. Traditional search can match terms from the stored full text, while semantic search uses vector embeddings to retrieve conceptually related text chunks. Ranking metrics such as Precision@k and Mean Reciprocal Rank are commonly used to evaluate retrieval quality.
+
+\paragraph{} In this project, the search layer combines keyword search with database-backed fallback search. The RAG layer additionally indexes document chunks for semantic retrieval, making it possible to retrieve evidence for natural-language question answering.
+
+\section{Retrieval-Augmented Generation}
+\paragraph{} Retrieval-Augmented Generation combines a parametric language model with non-parametric retrieved knowledge. Lewis et al. introduced RAG for knowledge-intensive NLP tasks, showing how retrieved passages can improve factuality and specificity in generation \cite{lewis2020rag}. In document intelligence, RAG is useful because answers can be grounded in uploaded documents rather than relying only on the language model's internal knowledge.
+
+\paragraph{} A direct RAG pipeline retrieves passages and asks an LLM to answer using those passages. However, practical document question answering benefits from more structure. A field lookup question such as ``What is the invoice number?'' should be answered from structured extractions if available. A comparison question may require multiple related clauses. A risk-review question may need evidence about obligations, penalties, termination, or expiry. The Agentic RAG approach in this project addresses these needs by planning the query, retrieving evidence, grading it, and then generating an evidence-backed answer.
+
+\section{Web Application Architecture}
+\paragraph{} The implemented prototype follows a common web application architecture. The frontend is built with React \cite{react2026} and Vite \cite{vite2026}, while the backend is implemented using FastAPI \cite{fastapi2026}. SQLAlchemy is used as the database ORM layer \cite{sqlalchemy2026}. This architecture separates user interaction from backend processing and makes the system easier to test, extend, and deploy.
+
+\section{Summary}
+\paragraph{} The literature shows that effective document intelligence requires more than OCR. It requires document layout understanding, structured extraction, confidence-aware validation, search, semantic retrieval, and grounded generation. The proposed system integrates these components into a working prototype and evaluates the outcome using both extraction and retrieval metrics.

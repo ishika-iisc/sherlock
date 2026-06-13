@@ -1,0 +1,275 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Originally prepared by YN Srikant (CSA)
+%% Updated for MTech Online by Yogesh Simmhan (CDS)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%input macros (i.e. write your own macros file called MacroFile1.tex)
+%\include{Macros/MacroFile1}
+\documentclass[oneside,12pt]{IIScthesisPSnPDF}
+
+% \pagestyle{bfheadings}
+%\usepackage{psfig}
+% \usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\usepackage[numbers]{natbib}
+\usepackage{cleveref}
+\usepackage{wrapfig}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{enumerate}
+\usepackage{cancel}
+\usepackage{mathrsfs}
+% \usepackage{sfgame}
+\usepackage{color}
+\usepackage[compact]{titlesec}
+\usepackage{mdwlist}
+\usepackage{tikz}
+\usepackage{varwidth}
+%\usepackage{hyperref}
+\usepackage{url}
+%\usepackage[vertfit]{breakurl}
+\usepackage{datetime}
+\usepackage{pdfpages}
+\usepackage{notoccite}
+\usepackage{diagbox}
+\usepackage{hhline}
+\usepackage{subfigure}
+% -----------------------------------------
+\usepackage{etoolbox}
+\renewcommand\nomgroup[1]{%
+  \item[\bfseries
+  \ifstrequal{#1}{S}{Symbols}{%
+  \ifstrequal{#1}{A}{Acronyms}{%
+  \ifstrequal{#1}{B}{Abbreviations}{}}}%
+]}
+% -----------------------------------------
+% \usepackage{biblatex}
+\usetikzlibrary{shapes,arrows, trees}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{preamble}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newcommand{\nobibentry}[1]{{\let\nocite\ignore\bibentry{#1}}}
+\newdateformat{monthyeardate}{ \monthname[\THEMONTH], \THEYEAR}
+\newcommand{\blankpage}{
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+}
+
+\newcommand{\blankpagewithnumber}{
+\newpage
+% \thispagestyle{empty}
+\mbox{}
+\newpage
+}
+\newcommand{\bpsi}{\pmb{\psi}}
+\newcommand{\bPsi}{\pmb{\Psi}}
+\newcommand{\bLambda}{\pmb{\Lambda}}
+\newcommand{\bX}{\boldsymbol{\textbf{X}}}
+\newcommand{\x}{\boldsymbol{\textbf{x}}}
+\newcommand{\bM}{\boldsymbol{\textbf{M}}}
+\newcommand{\bD}{\boldsymbol{\textbf{D}}}
+\newcommand{\bE}{\boldsymbol{\textbf{E}}}
+\newcommand{\bQ}{\boldsymbol{\textbf{Q}}}
+\newcommand{\bN}{\boldsymbol{\textbf{N}}}
+\newcommand{\Hmat}{\boldsymbol{\textbf{H}}}
+\crefname{observation}{observation}{observations}
+\crefname{algorithm}{algorithm}{algorithms}
+\crefname{align}{equation}{equations}
+\crefname{eqnarray}{equation}{equations}
+
+% turn of those nasty overfull and underfull hboxes
+\hbadness=10000
+\hfuzz=50pt
+
+% Put all the style files you want in the directory StyleFiles and usepackage like this:
+% \usepackage{StyleFiles/watermark}
+
+% Comment out the next line to get single spacing
+\setstretch{1.5}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TODO: FILL IN THESE DETAILS
+\newcommand{\mytitle}{Evidence-Graded Agentic Retrieval-Augmented Generation for Trustworthy Document Intelligence over Visually Rich Business Documents} 
+\newcommand{\myauthor}{Student Name}
+\newcommand{\mysrno}{SR Number}
+\newcommand{\mysubmitdate}{Month, Year} % E.g., July, 2026
+\newcommand{\mydegreejoindate}{Join Month, Year} % E.g., August, 2024
+\newcommand{\mydegreeenddate}{End Month, Year} % E.g., July, 2026
+% \newcommand{\mysubmitdate}{\monthyeardate\today}
+% Uncomment the relevant stream
+\newcommand{\mystream}{Artificial Intelligence}
+% \newcommand{\mystream}{Data Sciences and Business Analytics}
+% \newcommand{\mystream}{Electronics and Communications Engineering}
+\newcommand{\mycompanyguide}{Project Guide Name}
+\newcommand{\mycompanyname}{Organisation Name}
+\newcommand{\myfacultymentor}{IISc Faculty Mentor Name}
+\newcommand{\mymentordept}{Faculty Mentor Department Name}
+
+%% TODO: Update the relevant files: abstract.tex, acknowledgements.tex, nomenclature.tex, chap_introduction.tex, chap_literature_review.tex, chap_methodology.tex, chap_experiments_and_results.tex, chap_conclusion.tex and references.bib
+
+%% TODO: If required, add/remove chapter.tex files and accordingly update the inputs below.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\title{\mytitle} 
+\author{\myauthor}
+\srno{\mysrno}
+\submitdate{\mysubmitdate} 
+% Uncomment the relevant stream
+\stream{Artificial Intelligence}
+% \stream{Data Sciences and Business Analytics}
+% \stream{Electronics and Communications Engineering}
+
+% Do not modify
+\mtech
+\degree{Master of Technology (Online)}
+\faculty{Faculty of Engineering}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Using the watermark package which is in StyleFiles/
+% and to remove DRAFT COPY ONLY appearing on the top of all pages comment out below line
+%\watermark{DRAFT COPY ONLY}
+
+\maketitle
+\pagenumbering{gobble}
+%set the number of sectioning levels that get number and appear in the contents
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\blankpage
+\thispagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\LARGE{\underline{\textbf{Declaration of Originality}}}
+\end{center}
+\noindent I, \textbf{\myauthor}, with SR No. \textbf{\mysrno} hereby declare that the material presented in the project report titled
+
+\begin{center}
+\textbf{\mytitle}
+\end{center}
+
+\noindent represents original work carried out by me at \textbf{\mycompanyname} as part of the project credit requirements of the \textbf{Master of Technology (Online)} degree in \textbf{\mystream} at the Indian Institute of Science, between \textbf{\mydegreejoindate} to \textbf{\mydegreeenddate}.
+
+\noindent With my signature, I certify that:
+\begin{itemize}
+	\item I have not manipulated any of the data or results.
+	\item I have not committed any plagiarism of intellectual property.	I have clearly indicated and referenced the contributions of others.
+	\item I have explicitly acknowledged all collaborative research	and discussions.
+	\item I have understood that any false claim will result in severe disciplinary action.
+	\item I have understood that the work may be screened for any form of academic misconduct.
+\end{itemize}
+
+\vspace{10mm}
+
+\noindent {\footnotesize{Date:	\hfill	Student Signature}} \qquad
+
+\vspace{10mm}
+
+\noindent In our capacities as internal project guide and faculty mentor of the above-mentioned work, we certify that the above statements are true to the best of our knowledge, and we have carried out due diligence to ensure the originality of the report.
+
+\vspace{10mm}
+
+\noindent  {\footnotesize{Internal Guide Name: \textit{\mycompanyguide} \hfill Internal Guide Signature}} \qquad\\
+\noindent  {\footnotesize{Organisation: \textit{\mycompanyname}}}
+\vspace{5mm}
+
+\noindent  {\footnotesize{Faculty Mentor Name: \textit{\myfacultymentor} \hfill Faculty Mentor Signature}} \qquad\\
+\noindent  {\footnotesize{Department: \textit{\mymentordept}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\blankpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace*{\fill}
+\begin{center}
+\large\bf \textcopyright \ \myauthor \\
+\large\bf \mysubmitdate \\
+\large\bf All rights reserved
+\end{center}
+\vspace*{\fill}
+\thispagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\blankpage
+\thispagestyle{empty}
+
+
+\frontmatter % book mode only
+\pagenumbering{roman}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\prefacesection{Acknowledgements}
+\input{acknowledgements}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\prefacesection{Abstract}
+\input{abstract}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents
+%\blankpagewithnumber
+\listoffigures
+\listoftables
+\listofalgorithms
+\addcontentsline{toc}{chapter}{List of Algorithms}
+\addtocontents{toc}{\def\string\figurename{Algorithm}}
+
+\input{nomenclature}
+\printnomenclature  %% Print the nomenclature
+\addcontentsline{toc}{chapter}{Acronyms, Abbreviations and Symbols}
+
+% \blankpagewithnumber
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mainmatter % book mode only
+\setcounter{page}{1}
+
+%% TODO: If you add/remove chapters, update the inputs below.
+\input{chap_introduction}
+\input{chap_literature_review}
+\input{chap_methodology}
+\input{chap_experiments_and_results}
+\input{chap_conclusion}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\backmatter % book mode only
+% TODO: UNCOMMENT THESE IF YOU HAVE AN APPENDIX
+\appendix
+\include{appendix}
+
+% bibliography style
+\bibliographystyle{unsrtnat}
+% changes default name Bibliography to References
+\renewcommand{\bibname}{References} 
+% Include references cited in project report
+\bibliography{references}
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

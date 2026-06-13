@@ -1,0 +1,92 @@
+\chapter{Pilot Results and Research Evaluation Plan}
+\label{chap:experiments_and_results}
+
+\section{Purpose of Evaluation}
+\paragraph{} The purpose of evaluation is to determine whether the proposed evidence-graded Agentic RAG framework improves trustworthy document intelligence compared with simpler baselines. The current prototype provides pilot metrics, while the full research plan defines the experiments required for a PhD-level study.
+
+\section{Pilot Prototype Setup}
+\paragraph{} The prototype was evaluated in a local environment using the FastAPI backend, React frontend, SQLite database, OCR services, document classification service, extraction layer, validation layer, search layer, and Agentic RAG endpoint. The application statistics endpoint reported five uploaded documents, two completed documents, two documents requiring review, and an average processing time of 120941 ms.
+
+\paragraph{} The current benchmark file was available through the evaluation endpoint. The measured values should be interpreted as early pilot results because the benchmark is small and not yet representative of a full research dataset.
+
+\section{Pilot Metrics}
+\paragraph{} The preliminary metrics are shown in \cref{tab:evaluation_results}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Metric} & \textbf{Pilot Value} & \textbf{Interpretation} \\
+\midrule
+Field Extraction F1 & 0.8 & Promising but needs larger benchmark \\
+Search Precision@5 & 0.25 & Top-five ranking needs improvement \\
+Search MRR & 1.0 & First relevant result appeared early \\
+QA Answer Accuracy & Not measured & Requires labelled QA benchmark \\
+Throughput & 29.77 docs/hr & Suitable for local prototype \\
+Review Rate & 0.152 & Indicates human-review routing is active \\
+\bottomrule
+\end{tabular}
+\caption{Pilot evaluation metrics from the current prototype}
+\label{tab:evaluation_results}
+\end{table}
+
+\section{Interpretation of Pilot Results}
+\paragraph{} The Field Extraction F1 score of 0.8 suggests that rule-based and assisted extraction can capture useful structured fields in the pilot dataset. However, a larger dataset is required before making general claims. Search MRR of 1.0 indicates that the first relevant result appeared at the top for the benchmark cases, while Precision@5 of 0.25 suggests that the broader ranked list includes irrelevant results. This points to a clear research opportunity in hybrid retrieval, reranking, and evidence grading.
+
+\paragraph{} The review rate of 0.152 indicates that the system is not blindly accepting every extracted value. From a trustworthiness perspective, this is valuable because uncertain fields are surfaced for human review. From an operational perspective, excessive review load can reduce automation benefits. Therefore, review rate should be studied as a trade-off against extraction F1 and answer faithfulness.
+
+\section{Proposed Research Dataset}
+\paragraph{} A PhD-ready evaluation should use a larger dataset with four annotation layers:
+
+\begin{enumerate}
+    \item \textbf{Document labels}: document type, page count, scan quality, and source.
+    \item \textbf{Field labels}: ground-truth values for dates, amounts, parties, invoice numbers, purchase orders, and other domain fields.
+    \item \textbf{Retrieval labels}: relevance judgments for chunks retrieved for each query.
+    \item \textbf{QA labels}: ground-truth answers, acceptable answer variants, and supporting evidence spans.
+\end{enumerate}
+
+\section{Baseline Comparison Protocol}
+\paragraph{} The main experiment should compare four systems:
+
+\begin{enumerate}
+    \item B0: OCR-only extraction.
+    \item B1: Direct OCR plus RAG.
+    \item B2: Structured extraction plus direct RAG.
+    \item B3: Evidence-graded Agentic RAG.
+\end{enumerate}
+
+\paragraph{} Each system should be evaluated over identical documents and questions. Exact-field questions should test whether structured lookup improves correctness and latency. Summary, comparison, and risk-review questions should test whether evidence grading improves faithfulness and reduces unsupported claims.
+
+\section{Evaluation Metrics}
+\paragraph{} The full evaluation protocol should include:
+
+\begin{enumerate}
+    \item \textbf{Extraction metrics}: precision, recall, F1, field-level confidence calibration, and validation error rate.
+    \item \textbf{Retrieval metrics}: Precision@1, Precision@5, MRR, context precision, and context recall.
+    \item \textbf{Generation metrics}: answer correctness, faithfulness, answer relevance, unsupported-claim rate, citation accuracy, and refusal appropriateness.
+    \item \textbf{Operational metrics}: latency, throughput, memory usage, and human-review rate.
+    \item \textbf{Human evaluation}: expert judgement of answer usefulness, evidence sufficiency, and trust.
+\end{enumerate}
+
+\section{Expected Comparative Analysis}
+\paragraph{} The expected outcome is not that the proposed system dominates every metric. Instead, the research should identify trade-offs. OCR-only extraction is expected to be fast but limited for question answering. Direct RAG is expected to answer broad questions but may hallucinate or cite weak evidence. Structured extraction plus direct RAG should improve exact questions but may not fully solve faithfulness. Evidence-graded Agentic RAG is expected to improve traceability and reduce unsupported answers, possibly at the cost of additional latency.
+
+\section{Ablation Studies}
+\paragraph{} The following ablation studies are proposed:
+
+\begin{enumerate}
+    \item Remove structured-field lookup and measure exact-field QA accuracy and latency.
+    \item Remove evidence grading and measure faithfulness and unsupported-claim rate.
+    \item Remove validation flags and measure downstream answer confidence calibration.
+    \item Compare keyword retrieval, dense retrieval, and hybrid retrieval.
+    \item Compare different confidence thresholds for review routing.
+\end{enumerate}
+
+\section{Statistical Analysis}
+\paragraph{} For a larger dataset, paired comparisons should be used because each system answers the same question set. Retrieval and QA metrics can be compared using paired significance tests or bootstrap confidence intervals. Inter-annotator agreement should be reported for human-labelled relevance and faithfulness judgments.
+
+\section{Discussion}
+\paragraph{} The pilot results show that the implemented prototype is a viable platform for research. The current extraction and retrieval metrics are sufficient to justify deeper experimentation, but not sufficient for final research claims. The strongest PhD path is therefore to treat this M.Tech work as a prototype and convert it into a rigorous study on uncertainty-aware, evidence-graded document QA.
+
+\section{Summary}
+\paragraph{} The current system provides measurable pilot evidence and a working end-to-end implementation. The research evaluation plan extends this into a publishable experimental design with baselines, ablations, multiple metrics, and human evaluation.

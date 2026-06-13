@@ -1,0 +1,81 @@
+\chapter{Experiments and Results}
+\label{chap:experiments_and_results}
+
+\section{Evaluation Objectives}
+\paragraph{} The evaluation of the prototype focuses on whether the implemented system can process uploaded documents, extract useful structured fields, support document retrieval, and expose measurable system behaviour. Since the project is a working prototype, the evaluation includes both benchmark metrics and operational telemetry. The primary objective is not to claim production-level accuracy, but to demonstrate that the integrated pipeline works and to identify measurable improvement areas.
+
+\section{Experimental Setup}
+\paragraph{} The prototype was evaluated on the local application stack. The FastAPI backend served both the API and the built React single-page application. Documents were stored in the local storage directory and metadata was persisted in SQLite. The evaluation endpoint used the benchmark file configured under the backend evaluation storage path.
+
+\paragraph{} The live prototype snapshot used for this report contained five uploaded documents. Of these, two documents had completed processing and two required manual review. The average recorded processing time reported by the application statistics endpoint was 120941 ms, or approximately 120.94 seconds. This value includes the full processing path, including extraction, validation, indexing, and model-related overhead.
+
+\section{Metrics}
+\paragraph{} The prototype exposes the following implemented metrics:
+
+\begin{enumerate}
+    \item \textbf{Field Extraction F1}: measures the balance between precision and recall for key-value extraction against benchmark fields.
+    \item \textbf{Search Precision@5}: measures how often the top five search results contain relevant benchmark documents.
+    \item \textbf{Search Mean Reciprocal Rank}: measures how early the first relevant document appears in ranked search results.
+    \item \textbf{Throughput}: estimates the number of documents processed per hour based on recorded processing times.
+    \item \textbf{Review Rate}: measures the fraction of extracted fields flagged for manual review.
+\end{enumerate}
+
+\paragraph{} Question-answering accuracy is present as a planned metric in the evaluation endpoint, but it is not yet measured because a labelled QA benchmark has not been finalised. This is explicitly reported as pending rather than being treated as an achieved metric.
+
+\section{Results}
+\paragraph{} The benchmark and telemetry results reported by the current prototype are shown in \cref{tab:evaluation_results}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Metric} & \textbf{Measured Value} & \textbf{Status} \\
+\midrule
+Field Extraction F1 & 0.8 & Measured \\
+Search Precision@5 & 0.25 & Measured \\
+Search MRR & 1.0 & Measured \\
+QA Answer Accuracy & Not measured & Planned \\
+Throughput & 29.77 docs/hr & Measured \\
+Review Rate & 0.152 & Measured \\
+\bottomrule
+\end{tabular}
+\caption{Prototype evaluation metrics}
+\label{tab:evaluation_results}
+\end{table}
+
+\paragraph{} The Field Extraction F1 score of 0.8 indicates that the prototype is able to extract benchmarked key fields with useful accuracy, while still leaving room for improvement. The Search MRR score of 1.0 indicates that, for the available benchmark search cases, the first relevant result appeared at rank one. The Search Precision@5 value of 0.25 indicates that while the top result may be good, the broader top-five ranking still contains non-relevant documents and should be improved.
+
+\paragraph{} The throughput value of 29.77 documents per hour is acceptable for a local proof of concept but is not yet optimised for production. The review rate of 0.152 shows that a measurable fraction of extracted fields were flagged for manual review. This is desirable from a safety perspective because the system should not silently accept uncertain extractions. However, a high review rate in production would increase user workload, so future improvements should reduce false review flags.
+
+\section{Operational Verification}
+\paragraph{} In addition to benchmark metrics, the prototype was verified through live API checks. The health endpoint returned a healthy status. The root route served the frontend. The statistics endpoint returned document counts and processing time. The Agentic RAG route served the question-answering interface. These checks confirm that the application can be run as a single backend-served web application.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Route} & \textbf{Purpose} \\
+\midrule
+\texttt{/health} & Backend health check \\
+\texttt{/} & Frontend single-page application \\
+\texttt{/api/v1/stats} & Processing statistics \\
+\texttt{/api/v1/evaluation/metrics} & Evaluation metrics \\
+\texttt{/agentic-rag} & Agentic RAG user interface route \\
+\bottomrule
+\end{tabular}
+\caption{Operational routes used for prototype verification}
+\label{tab:operational_routes}
+\end{table}
+
+\section{Discussion}
+\paragraph{} The results show that the prototype successfully integrates multiple document intelligence capabilities into one application. The extraction pipeline can process documents, store extracted fields, validate values, and index content. The search and retrieval layers allow documents to be discovered after processing. The Agentic RAG workflow adds a higher-level question-answering interface with traceable evidence.
+
+\paragraph{} The strongest current result is the Search MRR score, which indicates that relevant documents can appear early in ranked results for the benchmark cases. The Field Extraction F1 score is also promising for a prototype. The lower Precision@5 score suggests that search ranking should be improved using stronger semantic scoring, better chunking, metadata-aware ranking, or hybrid lexical-vector retrieval.
+
+\paragraph{} Processing time is influenced by document type. Digital PDFs can be processed faster because embedded text can be extracted directly. Scanned documents require OCR and layout-aware processing, which increases latency. Model loading and local LLM inference also contribute to runtime. Production deployment would benefit from model warm-up, asynchronous workers, GPU acceleration, batch processing, and persistent vector indexes.
+
+\section{Limitations of the Evaluation}
+\paragraph{} The current evaluation has three important limitations. First, the benchmark dataset is small and should be expanded to include more invoices, contracts, forms, reports, scanned files, and mixed-quality documents. Second, QA accuracy has not yet been measured against labelled question-answer pairs. Third, the prototype is evaluated in a local environment, so cloud scalability, concurrent users, authentication, and enterprise integration are not fully tested.
+
+\section{Summary}
+\paragraph{} The evaluation confirms that the implemented system is a functional proof of concept for AI-powered document intelligence. It demonstrates measurable extraction, search, throughput, and review behaviour. The next stage should expand the benchmark dataset, improve ranking quality, add QA ground truth, and evaluate the system under more realistic production conditions.
